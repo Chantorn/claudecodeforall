@@ -316,7 +316,20 @@ function toggleFav(id) {
 function spiceText(n) { return n === 0 ? "ไม่เผ็ด" : "🌶️".repeat(n); }
 function spiceLabel(n) { return n === 0 ? "ไม่เผ็ด" : "เผ็ด " + n + " จาก 3"; }
 
-function iconHTML(d) { return d.img ? `<img src="${d.img}" alt="">` : d.emoji; }
+const IMG_SLUGS = {
+  2: "kra-pao", 3: "pad-see-ew", 4: "pad-pak-boong", 5: "pad-prik-gaeng", 6: "khua-kling",
+  7: "pad-kra-pao-goong", 8: "green-curry", 9: "massaman", 10: "panang", 11: "gaeng-som",
+  12: "gaeng-jued", 13: "tom-yum-goong", 14: "tom-kha-gai", 15: "jok-moo", 16: "tom-klong-pla",
+  17: "gai-tod-hat-yai", 18: "pla-tod-nam-pla", 19: "tod-man-pla", 20: "moo-tod-kratiem", 21: "por-pia-tod",
+  22: "som-tam", 23: "yum-woon-sen", 24: "larb-moo", 25: "yum-talay", 26: "nam-tok-moo",
+  27: "khao-niao-mamuang", 28: "bua-loi", 29: "tub-tim-grob", 30: "kluay-buat-chi"
+};
+function imgSrc(d) { return d.img || (IMG_SLUGS[d.id] ? `images/${IMG_SLUGS[d.id]}.jpg` : null); }
+// ถ้าไฟล์รูปโหลดไม่ได้ ให้กลับไปแสดง emoji
+function iconHTML(d) {
+  const src = imgSrc(d);
+  return src ? `<img src="${src}" alt="" onerror="this.replaceWith(document.createTextNode('${d.emoji}'))">` : d.emoji;
+}
 
 function rowHTML(d) {
   const on = isFav(d.id);
