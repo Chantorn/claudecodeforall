@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>วันนี้กินอะไรดี</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;700;800&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --tile: #E9F1EA;
+    --ink: #12281F;
+    --muted: #4D6558;
+    --line: #9DB5A5;
+    --chili: #D42A1C;
+    --sign: #FFD23F;
+    --lime: #8DB92E;
+    --row-hover: #DDE9DF;
+    --display: "Prompt", "Noto Sans Thai", Tahoma, system-ui, sans-serif;
+    --body: "Sarabun", "Noto Sans Thai", Tahoma, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --tile: #0F1D17;
+      --ink: #EAF3EC;
+      --muted: #A5BBAC;
+      --line: #3B5545;
+      --row-hover: #16291F;
+      --lime: #A7D64A;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--tile);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+  button, select { font: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .sign :focus-visible { outline-color: var(--sign); }
+
+  /* ป้ายผลสุ่ม */
+  .sign {
+    background: var(--chili);
+    color: var(--sign);
+    padding: 28px 16px 32px;
+    border-bottom: 8px solid var(--sign);
+  }
+  .sign-in { max-width: 960px; margin: 0 auto; }
+  .sign-title { font-family: var(--display); font-weight: 500; font-size: 1.05rem; margin: 0 0 12px; color: #fff; }
+  .pick-name {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(2.6rem, 11vw, 6rem);
+    line-height: 1.15;
+    margin: 0;
+    min-height: 1.15em;
+    overflow-wrap: anywhere;
+  }
+  .pick-emoji { font-size: clamp(2.6rem, 9vw, 4.5rem); line-height: 1; margin-bottom: 4px; }
+  .pick-desc { color: #fff; max-width: 34em; margin: 8px 0 0; min-height: 3.2em; }
+  .pick-meta { display: flex; align-items: center; gap: 16px; margin-top: 8px; color: #fff; font-family: var(--display); font-size: .95rem; }
+  .sign-actions { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-top: 20px; }
+  .btn-random {
+    background: var(--sign);
+    color: #3a1200;
+    border: 0;
+    border-radius: 6px;
+    padding: 12px 28px;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 0 #a37a00;
+  }
+  .btn-random:active { transform: translateY(3px); box-shadow: 0 1px 0 #a37a00; }
+  .btn-random:disabled { opacity: .7; }
+  .opt { display: inline-flex; align-items: center; gap: 8px; color: #fff; }
+  .opt input { width: 20px; height: 20px; accent-color: var(--sign); }
+  .note { color: #fff; margin: 12px 0 0; min-height: 1.6em; font-size: .95rem; }
+  .pick-heart {
+    background: transparent; color: var(--sign);
+    border: 2px solid var(--sign); border-radius: 999px;
+    padding: 2px 14px; font-size: 1.05rem; font-family: var(--display);
+  }
+  .pick-heart[aria-pressed="true"] { background: var(--sign); color: var(--chili); }
+
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px 56px; }
+  h2 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 40px 0 8px; }
+
+  /* ป้ายเมนู */
+  .tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px; }
+  .tab {
+    flex: none;
+    background: transparent; color: var(--ink);
+    border: 2px solid var(--ink); border-radius: 6px;
+    padding: 4px 16px;
+    font-family: var(--display); font-weight: 500;
+  }
+  .tab[aria-pressed="true"] { background: var(--ink); color: var(--tile); }
+
+  .search { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 4px 0 8px; }
+  .search input[type="search"], .search select {
+    background: var(--tile); color: var(--ink);
+    border: 2px solid var(--ink); border-radius: 6px;
+    padding: 8px 12px; min-height: 44px;
+  }
+  .search input[type="search"] { flex: 1 1 260px; }
+  .opt-dark { display: inline-flex; align-items: center; gap: 8px; }
+  .opt-dark input { width: 20px; height: 20px; accent-color: var(--chili); }
+  .count { margin: 0 0 8px; color: var(--muted); font-size: .95rem; }
+  .btn-clear {
+    background: none; border: 0; padding: 0 4px; color: var(--chili);
+    text-decoration: underline; font-weight: 600;
+  }
+  .menu { list-style: none; margin: 0; padding: 0; border-top: 3px solid var(--ink); }
+  .row {
+    display: grid;
+    grid-template-columns: 2.6rem 1fr auto;
+    gap: 4px 12px;
+    align-items: start;
+    padding: 12px 4px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .row:hover { background: var(--row-hover); }
+  .row .emoji { font-size: 2rem; line-height: 1.2; text-align: center; }
+  .row .emoji img { width: 2.6rem; height: 2.6rem; object-fit: cover; border-radius: 50%; display: block; }
+  .pick-emoji img { width: clamp(2.6rem, 9vw, 4.5rem); height: clamp(2.6rem, 9vw, 4.5rem); object-fit: cover; border-radius: 50%; display: block; }
+  .row-head { display: flex; align-items: baseline; gap: 8px; }
+  .row-name { font-family: var(--display); font-weight: 700; font-size: 1.15rem; line-height: 1.4; }
+  .leader { flex: 1; border-bottom: 2px dotted var(--line); transform: translateY(-4px); min-width: 12px; }
+  .spice { white-space: nowrap; font-size: .9rem; color: var(--muted); }
+  .row-desc { grid-column: 2; margin: 0; color: var(--muted); font-size: .98rem; max-width: 36em; }
+  .row-cat { grid-column: 2; color: var(--lime); font-size: .85rem; font-weight: 600; }
+  .btn-detail {
+    background: none; border: 0; padding: 0 0 0 8px; color: var(--chili);
+    text-decoration: underline; font-weight: 600; font-size: .85rem;
+  }
+  dialog {
+    background: var(--tile); color: var(--ink);
+    border: 3px solid var(--ink); border-radius: 8px;
+    padding: 20px; width: min(560px, calc(100vw - 32px)); max-height: 88vh;
+  }
+  dialog::backdrop { background: rgba(0, 0, 0, .55); }
+  dialog h2 { margin: 0; font-size: 1.6rem; }
+  dialog h3 { font-family: var(--display); font-size: 1.05rem; margin: 18px 0 6px; }
+  dialog p { margin: 8px 0; }
+  .detail-top { display: flex; align-items: center; gap: 14px; }
+  .detail-icon { font-size: 3rem; line-height: 1; }
+  .detail-icon img { width: 4.5rem; height: 4.5rem; object-fit: cover; border-radius: 50%; display: block; }
+  .detail-meta { color: var(--muted); margin: 2px 0 0; }
+  .chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips li { border: 2px solid var(--ink); border-radius: 999px; padding: 2px 12px; font-size: .95rem; }
+  .chips.warn li { border-color: var(--chili); color: var(--chili); font-weight: 600; }
+  .btn-close {
+    margin-top: 20px; background: var(--ink); color: var(--tile);
+    border: 0; border-radius: 6px; padding: 10px 24px; font-family: var(--display); font-weight: 700;
+  }
+  .heart {
+    grid-column: 3; grid-row: 1 / span 3;
+    background: none; border: 0; padding: 6px 8px;
+    font-size: 1.7rem; line-height: 1; color: var(--muted);
+  }
+  .heart[aria-pressed="true"] { color: var(--chili); }
+  .empty { padding: 16px 4px; color: var(--muted); border-top: 3px solid var(--ink); }
+  footer { color: var(--muted); font-size: .9rem; margin-top: 40px; }
+
+  @media (min-width: 720px) {
+    .sign { padding: 44px 16px 48px; }
+  }
+</style>
+</head>
+<body>
+<section class="sign" aria-label="ผลสุ่มเมนู">
+  <div class="sign-in">
+    <p class="sign-title">🍛 วันนี้กินอะไรดี</p>
+    <div id="pickBody" aria-live="polite">
+      <h1 class="pick-name">สุ่มเมนูให้หน่อย</h1>
+      <p class="pick-desc">กดปุ่มด้านล่าง เดี๋ยวเลือกให้หนึ่งเมนู</p>
+    </div>
+    <div class="sign-actions">
+      <button class="btn-random" id="randomBtn" type="button">🎲 สุ่มเมนูวันนี้</button>
+      <label class="opt"><input type="checkbox" id="onlyFav"> สุ่มจากรายการโปรดเท่านั้น</label>
+    </div>
+    <p class="note" id="note" role="status"></p>
+  </div>
+</section>
+
+<main class="wrap">
+  <h2>รายการโปรดของฉัน</h2>
+  <div id="favList"></div>
+
+  <h2>เมนูทั้งหมด</h2>
+  <div class="search">
+    <input type="search" id="q" placeholder="ค้นหาชื่อเมนูหรือวัตถุดิบ เช่น กุ้ง หมูสับ" aria-label="ค้นหาเมนู" autocomplete="off">
+    <select id="spiceSel" aria-label="กรองตามระดับความเผ็ด">
+      <option value="">ทุกระดับความเผ็ด</option>
+      <option value="0">ไม่เผ็ด</option>
+      <option value="1">เผ็ดน้อย 🌶️</option>
+      <option value="2">เผ็ดกลาง 🌶️🌶️</option>
+      <option value="3">เผ็ดมาก 🌶️🌶️🌶️</option>
+    </select>
+    <label class="opt-dark"><input type="checkbox" id="favOnly"> เฉพาะรายการโปรด</label>
+  </div>
+  <div class="tabs" id="filters" role="group" aria-label="กรองตามหมวด"></div>
+  <p class="count" id="count" role="status"></p>
+  <ul class="menu" id="allList"></ul>
+
+  <footer>รายการโปรดเก็บไว้ในเบราว์เซอร์ของคุณเท่านั้น</footer>
+</main>
+
+<dialog id="detailDlg" aria-labelledby="detailTitle">
+  <div id="detailBody"></div>
+  <button class="btn-close" id="detailClose" type="button">ปิด</button>
+</dialog>
+
+<script>
+const DISHES = [
+  { id: 1,  name: "ผัดไทย",            desc: "เส้นจันท์ผัดซอสมะขาม ใส่กุ้งสด เต้าหู้ ถั่วงอก โรยถั่วลิสง", cat: "ผัด", spice: 1, emoji: "🍜", img: "images/pad-thai.png" },
+  { id: 2, name: "กะเพราหมูสับไข่ดาว", desc: "หมูสับผัดใบกะเพรา พริก กระเทียม เสิร์ฟกับข้าวและไข่ดาวกรอบ", cat: "ผัด", spice: 3, emoji: "🍳" },
+  { id: 3,  name: "ผัดซีอิ๊ว",          desc: "เส้นใหญ่ผัดซีอิ๊วดำ หอมไหม้กระทะ ใส่ผักคะน้าและหมู", cat: "ผัด", spice: 0, emoji: "🥢" },
+  { id: 4,  name: "ผัดผักบุ้งไฟแดง",    desc: "ผักบุ้งผัดน้ำมันหอย พริก กระเทียม ไฟแรงกรอบสด", cat: "ผัด", spice: 2, emoji: "🥬" },
+  { id: 5,  name: "ผัดพริกแกงหมูกรอบ",  desc: "หมูกรอบผัดพริกแกงกับถั่วฝักยาว หอมเครื่องแกง", cat: "ผัด", spice: 3, emoji: "🥓" },
+  { id: 6,  name: "คั่วกลิ้งหมู",       desc: "หมูสับคลุกเครื่องแกงใต้แห้งๆ เผ็ดจัด หอมขมิ้น", cat: "ผัด", spice: 3, emoji: "🌶️" },
+  { id: 7,  name: "ผัดกะเพรากุ้ง",      desc: "กุ้งสดผัดกะเพรา รสจัดจ้าน กลิ่นหอมฉุย", cat: "ผัด", spice: 3, emoji: "🦐" },
+  { id: 8,  name: "แกงเขียวหวานไก่",    desc: "แกงกะทิสีเขียว มะเขือพวง ใบโหระพา รสหวานมัน", cat: "แกง", spice: 2, emoji: "🥘" },
+  { id: 9,  name: "แกงมัสมั่นเนื้อ",    desc: "เนื้อตุ๋นนุ่มในแกงกะทิหอมเครื่องเทศ ใส่มันฝรั่งและหัวหอม", cat: "แกง", spice: 1, emoji: "🍲" },
+  { id: 10, name: "พะแนงหมู",          desc: "แกงข้นหอมถั่วลิสง ราดกะทิ โรยพริกชี้ฟ้าซอย", cat: "แกง", spice: 2, emoji: "🥘" },
+  { id: 11, name: "แกงส้มชะอมกุ้ง",     desc: "น้ำแกงเปรี้ยวเผ็ดร้อน ใส่ชะอมและกุ้งสด", cat: "แกง", spice: 3, emoji: "🍲" },
+  { id: 12, name: "แกงจืดเต้าหู้หมูสับ", desc: "น้ำซุปใสรสกลมกล่อม ใส่เต้าหู้อ่อน หมูสับ และผักกาดขาว", cat: "แกง", spice: 0, emoji: "🍜" },
+  { id: 13, name: "ต้มยำกุ้ง",          desc: "น้ำต้มยำร้อนแรง หอมตะไคร้ ข่า ใบมะกรูด ใส่กุ้งแม่น้ำ", cat: "ต้ม", spice: 3, emoji: "🍤" },
+  { id: 14, name: "ต้มข่าไก่",          desc: "ซุปกะทิรสเปรี้ยวหวานหอมข่า ใส่ไก่และเห็ด", cat: "ต้ม", spice: 1, emoji: "🍲" },
+  { id: 15, name: "โจ๊กหมู",           desc: "ข้าวต้มเละหอมขิง ใส่หมูสับ ไข่ ต้นหอม เหมาะมื้อเช้า", cat: "ต้ม", spice: 0, emoji: "🥣" },
+  { id: 16, name: "ต้มโคล้งปลากรอบ",    desc: "น้ำซุปเปรี้ยวเผ็ดใส่ปลาแดดเดียวทอดกรอบ หอมข้าวคั่ว", cat: "ต้ม", spice: 2, emoji: "🐟" },
+  { id: 17, name: "ไก่ทอดหาดใหญ่",      desc: "ไก่ทอดกรอบหมักเครื่องเทศ โรยหอมเจียว จิ้มน้ำจิ้มหวาน", cat: "ทอด", spice: 0, emoji: "🍗" },
+  { id: 18, name: "ปลาทอดน้ำปลา",       desc: "ปลาทอดกรอบราดน้ำปลาใส่กระเทียมเจียว", cat: "ทอด", spice: 0, emoji: "🐟" },
+  { id: 19, name: "ทอดมันปลากราย",      desc: "ปลาบดผสมพริกแกงและถั่วฝักยาว ทอดหอมกรอบ", cat: "ทอด", spice: 1, emoji: "🍘" },
+  { id: 20, name: "หมูทอดกระเทียม",     desc: "หมูหมักกระเทียมพริกไทยทอดกรอบ กินกับข้าวเหนียว", cat: "ทอด", spice: 0, emoji: "🥩" },
+  { id: 21, name: "ปอเปี๊ยะทอด",       desc: "แผ่นแป้งกรอบไส้วุ้นเส้นและผัก จิ้มน้ำจิ้มไก่", cat: "ทอด", spice: 0, emoji: "🌯" },
+  { id: 22, name: "ส้มตำไทย",          desc: "มะละกอสับตำน้ำปลามะนาว ใส่ถั่วลิสงและกุ้งแห้ง", cat: "ยำ", spice: 3, emoji: "🥗" },
+  { id: 23, name: "ยำวุ้นเส้น",         desc: "วุ้นเส้นคลุกน้ำยำเปรี้ยวเผ็ด ใส่กุ้งและหมูสับ", cat: "ยำ", spice: 3, emoji: "🥗" },
+  { id: 24, name: "ลาบหมู",            desc: "หมูสับปรุงรสข้าวคั่ว มะนาว พริกป่น สะระแหน่", cat: "ยำ", spice: 3, emoji: "🥬" },
+  { id: 25, name: "ยำทะเล",            desc: "กุ้ง หมึก หอย ในน้ำยำเปรี้ยวเผ็ดแซ่บ", cat: "ยำ", spice: 3, emoji: "🦑" },
+  { id: 26, name: "น้ำตกหมู",           desc: "หมูย่างหั่นชิ้นคลุกน้ำยำ ข้าวคั่ว พริกป่น หอมแดง", cat: "ยำ", spice: 2, emoji: "🥩" },
+  { id: 27, name: "ข้าวเหนียวมะม่วง",   desc: "ข้าวเหนียวมูนราดกะทิ กินกับมะม่วงสุกหวานฉ่ำ", cat: "ของหวาน", spice: 0, emoji: "🥭" },
+  { id: 28, name: "บัวลอยไข่หวาน",      desc: "ลูกบัวลอยสีสันในน้ำกะทิหอมหวาน ใส่ไข่หวาน", cat: "ของหวาน", spice: 0, emoji: "🍡" },
+  { id: 29, name: "ทับทิมกรอบ",         desc: "แห้วสีแดงเคลือบแป้ง ในน้ำกะทิเย็นและน้ำแข็งใส", cat: "ของหวาน", spice: 0, emoji: "🍧" },
+  { id: 30, name: "กล้วยบวชชี",         desc: "กล้วยน้ำว้าต้มในกะทิหวานมัน หอมอุ่นๆ", cat: "ของหวาน", spice: 0, emoji: "🍌" }
+];
+// ส่วนประกอบ: main = วัตถุดิบหลัก, season = เครื่องปรุง/น้ำซอส, allergens = สิ่งที่แพ้บ่อย
+const INGREDIENTS = {
+  1:  { main: ["เส้นจันท์", "กุ้งสด", "เต้าหู้แข็งหั่นเต๋า", "ไข่ไก่", "ถั่วงอก", "กุยช่าย", "หัวไชโป๊วหวาน", "กุ้งแห้ง"], season: ["น้ำมะขามเปียก", "น้ำตาลปี๊บ", "น้ำปลา", "พริกป่น", "ถั่วลิสงคั่วป่น", "มะนาว"], allergens: ["กุ้ง", "ไข่", "ถั่วลิสง"] },
+  2:  { main: ["หมูสับ", "ใบกะเพรา", "พริกขี้หนู", "กระเทียม", "ถั่วฝักยาว", "ไข่ไก่", "ข้าวสวย"], season: ["น้ำมันหอย", "ซีอิ๊วขาว", "ซีอิ๊วดำ", "น้ำตาลทราย", "น้ำปลา"], allergens: ["ไข่", "หอย", "ถั่วเหลือง"] },
+  3:  { main: ["เส้นใหญ่", "หมู", "ผักคะน้า", "ไข่ไก่", "กระเทียม"], season: ["ซีอิ๊วดำ", "ซีอิ๊วขาว", "น้ำมันหอย", "น้ำตาลทราย", "พริกไทย"], allergens: ["ไข่", "ถั่วเหลือง", "หอย", "ข้าวสาลี"] },
+  4:  { main: ["ผักบุ้งจีน", "กระเทียม", "พริกขี้หนู", "เต้าเจี้ยว"], season: ["น้ำมันหอย", "ซีอิ๊วขาว", "น้ำตาลทราย", "น้ำมันพืช"], allergens: ["ถั่วเหลือง", "หอย"] },
+  5:  { main: ["หมูกรอบ", "ถั่วฝักยาว", "ใบมะกรูด", "พริกชี้ฟ้า"], season: ["พริกแกงเผ็ด", "น้ำปลา", "น้ำตาลปี๊บ", "น้ำมันพืช"], allergens: ["กุ้ง (ในพริกแกง)"] },
+  6:  { main: ["หมูสับ", "ใบมะกรูดซอย", "พริกชี้ฟ้าแดง", "ถั่วฝักยาว"], season: ["พริกแกงใต้", "ขมิ้น", "น้ำปลา", "น้ำตาลปี๊บ", "น้ำมันพืช"], allergens: ["กุ้ง (ในพริกแกง)"] },
+  7:  { main: ["กุ้งสด", "ใบกะเพรา", "พริกขี้หนู", "กระเทียม", "ถั่วฝักยาว"], season: ["น้ำมันหอย", "ซีอิ๊วขาว", "น้ำปลา", "น้ำตาลทราย"], allergens: ["กุ้ง", "หอย", "ถั่วเหลือง"] },
+  8:  { main: ["เนื้อไก่", "มะเขือเปราะ", "มะเขือพวง", "พริกชี้ฟ้า", "ใบโหระพา", "ใบมะกรูด"], season: ["พริกแกงเขียวหวาน", "กะทิ", "น้ำปลา", "น้ำตาลปี๊บ"], allergens: ["กุ้ง (ในพริกแกง)"] },
+  9:  { main: ["เนื้อวัว", "มันฝรั่ง", "หัวหอม", "ถั่วลิสง"], season: ["พริกแกงมัสมั่น", "กะทิ", "น้ำมะขามเปียก", "น้ำตาลปี๊บ", "น้ำปลา", "กระวาน อบเชย"], allergens: ["ถั่วลิสง", "กุ้ง (ในพริกแกง)"] },
+  10: { main: ["หมูสามชั้นหรือสะโพก", "ใบมะกรูด", "พริกชี้ฟ้าแดง"], season: ["พริกแกงพะแนง", "กะทิ", "ถั่วลิสงป่น", "น้ำปลา", "น้ำตาลปี๊บ"], allergens: ["ถั่วลิสง", "กุ้ง (ในพริกแกง)"] },
+  11: { main: ["กุ้งสด", "ชะอม", "ผักกาดขาว", "มะละกอดิบ"], season: ["พริกแกงส้ม", "น้ำมะขามเปียก", "น้ำปลา", "น้ำตาลปี๊บ"], allergens: ["กุ้ง"] },
+  12: { main: ["เต้าหู้ไข่หรือเต้าหู้อ่อน", "หมูสับ", "ผักกาดขาว", "วุ้นเส้น", "ต้นหอม ผักชี"], season: ["น้ำซุปกระดูกหมู", "ซีอิ๊วขาว", "พริกไทย", "กระเทียมเจียว"], allergens: ["ถั่วเหลือง", "ไข่"] },
+  13: { main: ["กุ้งแม่น้ำ", "เห็ดฟาง", "มะเขือเทศ", "ตะไคร้", "ข่า", "ใบมะกรูด", "พริกขี้หนู"], season: ["น้ำพริกเผา", "น้ำปลา", "น้ำมะนาว", "นมข้นจืด (ต้มยำน้ำข้น)"], allergens: ["กุ้ง", "นม (ถ้าใส่)"] },
+  14: { main: ["เนื้อไก่", "เห็ดนางฟ้า", "ข่าอ่อน", "ตะไคร้", "ใบมะกรูด", "พริกขี้หนู"], season: ["กะทิ", "น้ำปลา", "น้ำมะนาว", "น้ำตาลปี๊บ"], allergens: [] },
+  15: { main: ["ข้าวสาร", "หมูสับ (ปั้นก้อน)", "ไข่ไก่", "ขิงซอย", "ต้นหอม ผักชี"], season: ["ซีอิ๊วขาว", "พริกไทย", "กระเทียมเจียว", "น้ำซุปกระดูกหมู"], allergens: ["ไข่", "ถั่วเหลือง"] },
+  16: { main: ["ปลาแดดเดียวทอดกรอบ", "มะเขือเทศ", "หอมแดง", "ตะไคร้", "ข่า", "ใบมะกรูด"], season: ["น้ำมะขามเปียก", "น้ำปลา", "ข้าวคั่วป่น", "พริกป่น", "น้ำตาลปี๊บ"], allergens: ["ปลา"] },
+  17: { main: ["ไก่ตัดเป็นชิ้น", "หอมแดงเจียว", "ข้าวเหนียว (เสิร์ฟคู่)"], season: ["ผงกะหรี่", "ขมิ้น", "กระเทียม", "พริกไทย", "แป้งทอดกรอบ", "น้ำจิ้มไก่หวาน"], allergens: ["ข้าวสาลี"] },
+  18: { main: ["ปลากะพงหรือปลาทับทิม", "กระเทียมเจียว", "ผักชี"], season: ["น้ำปลา", "น้ำตาลทราย", "น้ำมะนาว", "พริกไทย", "น้ำมันพืช"], allergens: ["ปลา"] },
+  19: { main: ["เนื้อปลากราย", "ถั่วฝักยาวหั่นฝอย", "ใบมะกรูดซอย"], season: ["พริกแกงเผ็ด", "น้ำปลา", "น้ำตาลทราย", "น้ำจิ้มอาจาด"], allergens: ["ปลา", "กุ้ง (ในพริกแกง)"] },
+  20: { main: ["หมูสันคอ", "กระเทียม", "ข้าวเหนียว (เสิร์ฟคู่)"], season: ["พริกไทย", "ซีอิ๊วขาว", "น้ำตาลทราย", "รากผักชี", "น้ำมันพืช"], allergens: ["ถั่วเหลือง"] },
+  21: { main: ["แผ่นปอเปี๊ยะ", "วุ้นเส้น", "แครอท", "กะหล่ำปลี", "เห็ดหูหนู", "หมูสับ"], season: ["ซีอิ๊วขาว", "พริกไทย", "น้ำตาลทราย", "น้ำจิ้มไก่หวาน"], allergens: ["ข้าวสาลี", "ถั่วเหลือง"] },
+  22: { main: ["มะละกอดิบ", "มะเขือเทศ", "ถั่วฝักยาว", "แครอท", "กุ้งแห้ง", "ถั่วลิสงคั่ว", "กระเทียม", "พริกขี้หนู"], season: ["น้ำปลา", "น้ำมะนาว", "น้ำตาลปี๊บ"], allergens: ["ถั่วลิสง", "กุ้ง"] },
+  23: { main: ["วุ้นเส้น", "กุ้ง", "หมูสับ", "หอมแดง", "ขึ้นฉ่าย", "ต้นหอม", "มะเขือเทศ"], season: ["น้ำมะนาว", "น้ำปลา", "น้ำตาลทราย", "พริกขี้หนู", "น้ำพริกเผา"], allergens: ["กุ้ง"] },
+  24: { main: ["หมูสับ", "หอมแดง", "ต้นหอม", "สะระแหน่", "ผักชีฝรั่ง"], season: ["ข้าวคั่วป่น", "พริกป่น", "น้ำปลา", "น้ำมะนาว"], allergens: [] },
+  25: { main: ["กุ้ง", "หมึกกล้วย", "หอยแมลงภู่", "หอมแดง", "ตะไคร้", "ขึ้นฉ่าย", "มะเขือเทศ"], season: ["น้ำมะนาว", "น้ำปลา", "น้ำตาลทราย", "พริกขี้หนู", "น้ำพริกเผา"], allergens: ["กุ้ง", "หอย", "หมึก"] },
+  26: { main: ["หมูสันคอย่าง", "หอมแดง", "ต้นหอม", "สะระแหน่", "แตงกวา (เสิร์ฟคู่)"], season: ["ข้าวคั่วป่น", "พริกป่น", "น้ำปลา", "น้ำมะนาว", "น้ำตาลทราย"], allergens: [] },
+  27: { main: ["ข้าวเหนียว", "มะม่วงน้ำดอกไม้สุก", "ถั่วเขียวเราะเปลือกทอด"], season: ["กะทิ", "น้ำตาลทราย", "เกลือ", "ใบเตย"], allergens: [] },
+  28: { main: ["แป้งข้าวเหนียว", "เผือกหรือฟักทอง", "ไข่ไก่ (ไข่หวาน)"], season: ["กะทิ", "น้ำตาลทราย", "เกลือ", "ใบเตย", "น้ำขิง"], allergens: ["ไข่"] },
+  29: { main: ["แห้ว", "แป้งมัน", "น้ำแข็งใส", "ขนุนหั่นฝอย"], season: ["น้ำกะทิ", "น้ำเชื่อม", "น้ำหอมกลิ่นดอกมะลิ", "สีผสมอาหารสีแดง"], allergens: [] },
+  30: { main: ["กล้วยน้ำว้าสุก"], season: ["กะทิ", "น้ำตาลทราย", "เกลือ", "งาขาวคั่ว"], allergens: [] }
+};
+const CATEGORIES =["ทั้งหมด", ...new Set(DISHES.map(d => d.cat))];
+const STORAGE_KEY = "thaiFoodFavorites";
+
+const byId = new Map(DISHES.map(d => [d.id, d]));
+const $ = id => document.getElementById(id);
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+let favorites = loadFavorites();
+let lastPickId = null;
+let activeCat = "ทั้งหมด";
+let shuffling = false;
+
+function loadFavorites() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (Array.isArray(raw)) return raw.filter(id => byId.has(id));
+  } catch (e) {}
+  return [];
+}
+function saveFavorites() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites)); } catch (e) {}
+}
+function isFav(id) { return favorites.includes(id); }
+function toggleFav(id) {
+  favorites = isFav(id) ? favorites.filter(f => f !== id) : [...favorites, id];
+  saveFavorites();
+  render();
+}
+
+function spiceText(n) { return n === 0 ? "ไม่เผ็ด" : "🌶️".repeat(n); }
+function spiceLabel(n) { return n === 0 ? "ไม่เผ็ด" : "เผ็ด " + n + " จาก 3"; }
+
+function iconHTML(d) { return d.img ? `<img src="${d.img}" alt="">` : d.emoji; }
+
+function rowHTML(d) {
+  const on = isFav(d.id);
+  return `<li class="row">
+    <div class="emoji" aria-hidden="true">${iconHTML(d)}</div>
+    <div class="row-head"><span class="row-name">${d.name}</span><span class="leader" aria-hidden="true"></span><span class="spice" role="img" aria-label="${spiceLabel(d.spice)}">${spiceText(d.spice)}</span></div>
+    <p class="row-desc">${d.desc}</p>
+    <span class="row-cat">${d.cat} <button class="btn-detail" type="button" data-detail="${d.id}">ดูส่วนประกอบ</button></span>
+    <button class="heart" type="button" data-fav="${d.id}" aria-pressed="${on}" aria-label="${on ? "เอา" + d.name + "ออกจากรายการโปรด" : "เพิ่ม" + d.name + "เป็นรายการโปรด"}">${on ? "♥" : "♡"}</button>
+  </li>`;
+}
+
+function renderPick() {
+  const d = byId.get(lastPickId);
+  if (!d) return;
+  const on = isFav(d.id);
+  $("pickBody").innerHTML = `<div class="pick-emoji" aria-hidden="true">${iconHTML(d)}</div>
+    <h1 class="pick-name">${d.name}</h1>
+    <p class="pick-desc">${d.desc}</p>
+    <div class="pick-meta"><span>${d.cat}</span><span role="img" aria-label="${spiceLabel(d.spice)}">${spiceText(d.spice)}</span>
+    <button class="pick-heart" type="button" data-fav="${d.id}" aria-pressed="${on}">${on ? "♥ เป็นรายการโปรดแล้ว" : "♡ เพิ่มเป็นรายการโปรด"}</button>
+    <button class="pick-heart" type="button" data-detail="${d.id}">ดูส่วนประกอบ</button></div>`;
+}
+function renderFavs() {
+  $("favList").innerHTML = favorites.length
+    ? `<ul class="menu">${favorites.map(id => rowHTML(byId.get(id))).join("")}</ul>`
+    : `<div class="empty">ยังไม่มีรายการโปรด กดหัวใจ ♡ ที่เมนูที่ชอบได้เลย</div>`;
+}
+function filteredDishes() {
+  const q = $("q").value.trim().toLowerCase();
+  const spice = $("spiceSel").value;
+  const favOnly = $("favOnly").checked;
+  return DISHES.filter(d =>
+    (activeCat === "ทั้งหมด" || d.cat === activeCat) &&
+    (spice === "" || d.spice === Number(spice)) &&
+    (!favOnly || isFav(d.id)) &&
+    (!q || (d.name + " " + d.desc + " " + d.cat).toLowerCase().includes(q)));
+}
+function hasFilter() {
+  return $("q").value.trim() !== "" || $("spiceSel").value !== "" || $("favOnly").checked || activeCat !== "ทั้งหมด";
+}
+function clearFilters() {
+  $("q").value = "";
+  $("spiceSel").value = "";
+  $("favOnly").checked = false;
+  activeCat = "ทั้งหมด";
+  renderFilters();
+  renderAll();
+}
+function renderAll() {
+  const list = filteredDishes();
+  const clear = hasFilter() ? ` <button class="btn-clear" type="button" id="clearBtn">ล้างตัวกรอง</button>` : "";
+  $("count").innerHTML = `พบ ${list.length} จาก ${DISHES.length} เมนู${clear}`;
+  $("allList").innerHTML = list.length
+    ? list.map(rowHTML).join("")
+    : `<li class="empty">ไม่พบเมนูที่ตรงกับตัวกรอง ลองเปลี่ยนคำค้นหาหรือล้างตัวกรอง</li>`;
+}
+function renderFilters() {
+  $("filters").innerHTML = CATEGORIES.map(c =>
+    `<button class="tab" type="button" data-cat="${c}" aria-pressed="${c === activeCat}">${c}</button>`).join("");
+}
+function render() { if (!shuffling) renderPick(); renderFavs(); renderAll(); }
+
+function randomPick() {
+  if (shuffling) return;
+  const note = $("note");
+  note.textContent = "";
+  const onlyFav = $("onlyFav").checked;
+  let pool = onlyFav ? favorites.map(id => byId.get(id)) : DISHES;
+  if (onlyFav && pool.length === 0) {
+    note.textContent = "ยังไม่มีรายการโปรด กดหัวใจที่เมนูก่อน หรือปิดตัวเลือกนี้เพื่อสุ่มจากทั้งหมด";
+    return;
+  }
+  if (pool.length > 1) pool = pool.filter(d => d.id !== lastPickId);
+  else if (pool[0].id === lastPickId) note.textContent = "มีรายการโปรดเมนูเดียว จึงได้เมนูเดิม";
+  const target = pool[Math.floor(Math.random() * pool.length)];
+
+  if (reduceMotion.matches) { lastPickId = target.id; render(); return; }
+
+  shuffling = true;
+  $("randomBtn").disabled = true;
+  const start = Date.now();
+  const timer = setInterval(() => {
+    const t = Date.now() - start;
+    if (t >= 600) {
+      clearInterval(timer);
+      shuffling = false;
+      $("randomBtn").disabled = false;
+      lastPickId = target.id;
+      render();
+      return;
+    }
+    const d = DISHES[Math.floor(Math.random() * DISHES.length)];
+    $("pickBody").innerHTML = `<div class="pick-emoji" aria-hidden="true">${iconHTML(d)}</div><p class="pick-name" aria-hidden="true">${d.name}</p><p class="pick-desc"></p>`;
+  }, 70);
+}
+
+let detailOpener = null;
+function listHTML(items) { return items.map(i => `<li>${i}</li>`).join(""); }
+function openDetail(id, opener) {
+  const d = byId.get(id), ing = INGREDIENTS[id];
+  if (!d || !ing) return;
+  detailOpener = opener;
+  $("detailBody").innerHTML = `
+    <div class="detail-top">
+      <div class="detail-icon" aria-hidden="true">${iconHTML(d)}</div>
+      <div><h2 id="detailTitle">${d.name}</h2>
+      <p class="detail-meta">${d.cat} · <span role="img" aria-label="${spiceLabel(d.spice)}">${spiceText(d.spice)}</span></p></div>
+    </div>
+    <p>${d.desc}</p>
+    <h3>วัตถุดิบหลัก</h3><ul class="chips">${listHTML(ing.main)}</ul>
+    <h3>เครื่องปรุงและน้ำซอส</h3><ul class="chips">${listHTML(ing.season)}</ul>
+    <h3>สารก่อภูมิแพ้ที่ควรระวัง</h3>
+    ${ing.allergens.length ? `<ul class="chips warn">${listHTML(ing.allergens)}</ul>` : `<p class="detail-meta">ไม่พบสารก่อภูมิแพ้หลักในสูตรทั่วไป</p>`}`;
+  $("detailDlg").showModal();
+}
+
+document.addEventListener("click", e => {
+  const det = e.target.closest("[data-detail]");
+  if (det) return openDetail(Number(det.dataset.detail), det);
+  if (e.target.closest("#detailClose") || e.target === $("detailDlg")) return $("detailDlg").close();
+  const fav = e.target.closest("[data-fav]");
+  if (fav) return toggleFav(Number(fav.dataset.fav));
+  const tab = e.target.closest("[data-cat]");
+  if (tab) { activeCat = tab.dataset.cat; renderFilters(); renderAll(); return; }
+  if (e.target.closest("#clearBtn")) clearFilters();
+});
+["q", "spiceSel", "favOnly"].forEach(id =>
+  $(id).addEventListener(id === "q" ? "input" : "change", renderAll));
+$("randomBtn").addEventListener("click", randomPick);
+$("detailDlg").addEventListener("close", () => { if (detailOpener && detailOpener.isConnected) detailOpener.focus(); });
+
+renderFilters();
+render();
+</script>
+</body>
+</html>
