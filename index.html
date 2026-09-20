@@ -6,216 +6,227 @@
 <title>วันนี้กินอะไรดี</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;700;800&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
 <style>
+  /* โทเคนจาก .claude/DESIGN.md (sweetgreen style) */
   :root {
-    --tile: #E9F1EA;
-    --ink: #12281F;
-    --muted: #4D6558;
-    --line: #9DB5A5;
-    --chili: #D42A1C;
-    --sign: #FFD23F;
-    --lime: #8DB92E;
-    --row-hover: #DDE9DF;
-    --display: "Prompt", "Noto Sans Thai", Tahoma, system-ui, sans-serif;
-    --body: "Sarabun", "Noto Sans Thai", Tahoma, system-ui, sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --tile: #0F1D17;
-      --ink: #EAF3EC;
-      --muted: #A5BBAC;
-      --line: #3B5545;
-      --row-hover: #16291F;
-      --lime: #A7D64A;
-    }
+    --deep-forest: #00473c;
+    --lime-glow: #e6ff55;
+    --sage-mist: #d8e5d6;
+    --warm-sand: #e8dcc6;
+    --cream: #f4f3e7;
+    --ink: #0e150e;
+    --warm-gray: #8c8c82;
+    --slate: #555555;
+    --shadow-xl: rgba(14, 21, 14, 0.4) 3px 3px 32px -10px;
+    --font: "Noto Sans Thai", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+    --max: 1200px;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: var(--tile);
+    background: var(--cream);
     color: var(--ink);
-    font-family: var(--body);
-    font-size: 1.05rem;
-    line-height: 1.6;
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: .017em;
   }
-  button, select { font: inherit; }
+  button, select, input { font: inherit; letter-spacing: inherit; }
   button { cursor: pointer; }
-  :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
-  .sign :focus-visible { outline-color: var(--sign); }
+  :focus-visible { outline: 3px solid var(--deep-forest); outline-offset: 3px; }
+  .inner { max-width: var(--max); margin: 0 auto; padding: 0 20px; }
 
-  /* ป้ายผลสุ่ม */
-  .sign {
-    background: var(--chili);
-    color: var(--sign);
-    padding: 28px 16px 32px;
-    border-bottom: 8px solid var(--sign);
+  /* ปุ่มพิล (รูปทรงเดียวของปุ่มทั้งหมด) */
+  .pill {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border-radius: 9999px; font-weight: 700; text-decoration: none;
+    padding: 12px 20px; min-height: 44px;
+    background: transparent; color: var(--deep-forest); border: 2px solid var(--deep-forest);
   }
-  .sign-in { max-width: 960px; margin: 0 auto; }
-  .sign-title { font-family: var(--display); font-weight: 500; font-size: 1.05rem; margin: 0 0 12px; color: #fff; }
+  .pill:hover { background: var(--deep-forest); color: var(--cream); }
+  .pill-primary { background: var(--lime-glow); color: var(--ink); border-color: var(--lime-glow); font-size: 18px; padding: 16px 24px; }
+  .pill-primary:hover { background: var(--lime-glow); color: var(--ink); box-shadow: var(--shadow-xl); }
+  .pill:disabled { opacity: .6; cursor: default; }
+  .link {
+    background: none; border: 0; padding: 0; color: var(--ink);
+    font-weight: 700; text-align: left;
+  }
+  .link:hover { text-decoration: underline; }
+
+  /* แถบนำทาง */
+  .nav { background: var(--cream); }
+  .nav .inner { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 72px; }
+  .nav a.nav-link { color: var(--ink); font-weight: 700; font-size: 14px; letter-spacing: .05em; text-decoration: none; }
+  .nav a.nav-link:hover { text-decoration: underline; }
+  .logo { color: var(--deep-forest); font-weight: 700; font-size: 24px; text-decoration: none; }
+  .nav .pill { justify-self: end; padding: 8px 16px; min-height: 40px; font-size: 14px; letter-spacing: .05em; }
+
+  /* ฮีโร่ = ผลสุ่มเมนู */
+  .hero { position: relative; display: flex; align-items: flex-end; min-height: 600px; background: var(--sage-mist); overflow: hidden; }
+  .hero-media { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .hero-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .hero-media .ph { font-size: 12rem; line-height: 1; }
+  .panel {
+    position: relative; z-index: 1;
+    background: rgba(244, 243, 231, .92);
+    margin: 0 0 40px max(20px, calc((100vw - var(--max)) / 2 + 20px));
+    padding: 40px; width: min(560px, calc(100% - 40px));
+  }
+  .eyebrow { font-weight: 700; font-size: 14px; letter-spacing: .05em; margin: 0 0 16px; color: var(--deep-forest); }
   .pick-name {
-    font-family: var(--display);
-    font-weight: 800;
-    font-size: clamp(2.6rem, 11vw, 6rem);
-    line-height: 1.15;
-    margin: 0;
-    min-height: 1.15em;
-    overflow-wrap: anywhere;
+    font-weight: 400; font-size: clamp(2.6rem, 9vw, 4.4rem);
+    line-height: 1.1; /* ภาษาไทยมีสระ/วรรณยุกต์ ใช้ 0.85 แล้วจะซ้อนกัน */
+    letter-spacing: 0; margin: 0 0 8px; overflow-wrap: anywhere;
   }
-  .pick-emoji { font-size: clamp(2.6rem, 9vw, 4.5rem); line-height: 1; margin-bottom: 4px; }
-  .pick-desc { color: #fff; max-width: 34em; margin: 8px 0 0; min-height: 3.2em; }
-  .pick-meta { display: flex; align-items: center; gap: 16px; margin-top: 8px; color: #fff; font-family: var(--display); font-size: .95rem; }
-  .sign-actions { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-top: 20px; }
-  .btn-random {
-    background: var(--sign);
-    color: #3a1200;
-    border: 0;
-    border-radius: 6px;
-    padding: 12px 28px;
-    font-family: var(--display);
-    font-weight: 800;
-    font-size: 1.2rem;
-    box-shadow: 0 4px 0 #a37a00;
-  }
-  .btn-random:active { transform: translateY(3px); box-shadow: 0 1px 0 #a37a00; }
-  .btn-random:disabled { opacity: .7; }
-  .opt { display: inline-flex; align-items: center; gap: 8px; color: #fff; }
-  .opt input { width: 20px; height: 20px; accent-color: var(--sign); }
-  .note { color: #fff; margin: 12px 0 0; min-height: 1.6em; font-size: .95rem; }
-  .pick-heart {
-    background: transparent; color: var(--sign);
-    border: 2px solid var(--sign); border-radius: 999px;
-    padding: 2px 14px; font-size: 1.05rem; font-family: var(--display);
-  }
-  .pick-heart[aria-pressed="true"] { background: var(--sign); color: var(--chili); }
+  .pick-desc { margin: 0 0 12px; max-width: 34em; min-height: 3em; }
+  .pick-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 20px; font-size: 14px; }
+  .pick-meta .pill { padding: 6px 14px; min-height: 36px; font-size: 14px; }
+  .pick-heart[aria-pressed="true"] { background: var(--deep-forest); color: var(--cream); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
+  .opt { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+  .opt input { width: 20px; height: 20px; accent-color: var(--deep-forest); }
+  .note { margin: 12px 0 0; min-height: 1.5em; font-size: 14px; }
 
-  .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px 56px; }
-  h2 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; margin: 40px 0 8px; }
+  /* ส่วนเนื้อหา */
+  .band { padding: 80px 0; }
+  .band-sage { background: var(--sage-mist); }
+  h2.section-title {
+    font-weight: 400; font-size: clamp(2.2rem, 6vw, 3rem); line-height: 1.15;
+    letter-spacing: 0; margin: 0 0 24px;
+  }
 
-  /* ป้ายเมนู */
-  .tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px; }
+  .tabs { display: flex; gap: 40px; overflow-x: auto; padding: 4px 0 16px; margin-bottom: 8px; }
   .tab {
-    flex: none;
-    background: transparent; color: var(--ink);
-    border: 2px solid var(--ink); border-radius: 6px;
-    padding: 4px 16px;
-    font-family: var(--display); font-weight: 500;
+    flex: none; position: relative; background: none; border: 0; padding: 0 0 14px;
+    color: var(--ink); font-weight: 400; font-size: clamp(1.5rem, 4vw, 2.5rem); line-height: 1.2; letter-spacing: 0;
   }
-  .tab[aria-pressed="true"] { background: var(--ink); color: var(--tile); }
+  .tab[aria-pressed="true"]::after {
+    content: ""; position: absolute; left: 50%; bottom: 0; width: 8px; height: 8px;
+    border-radius: 50%; background: var(--ink); transform: translateX(-50%);
+  }
 
-  .search { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 4px 0 8px; }
+  .search { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; margin: 0 0 16px; }
   .search input[type="search"], .search select {
-    background: var(--tile); color: var(--ink);
-    border: 2px solid var(--ink); border-radius: 6px;
+    background: var(--cream); color: var(--ink);
+    border: 2px solid var(--ink); border-radius: 8px;
     padding: 8px 12px; min-height: 44px;
   }
   .search input[type="search"] { flex: 1 1 260px; }
-  .opt-dark { display: inline-flex; align-items: center; gap: 8px; }
-  .opt-dark input { width: 20px; height: 20px; accent-color: var(--chili); }
-  .count { margin: 0 0 8px; color: var(--muted); font-size: .95rem; }
-  .btn-clear {
-    background: none; border: 0; padding: 0 4px; color: var(--chili);
-    text-decoration: underline; font-weight: 600;
-  }
-  .menu { list-style: none; margin: 0; padding: 0; border-top: 3px solid var(--ink); }
-  .row {
-    display: grid;
-    grid-template-columns: 2.6rem 1fr auto;
-    gap: 4px 12px;
-    align-items: start;
-    padding: 12px 4px;
-    border-bottom: 1px dashed var(--line);
-  }
-  .row:hover { background: var(--row-hover); }
-  .row .emoji { font-size: 2rem; line-height: 1.2; text-align: center; }
-  .row .emoji img { width: 2.6rem; height: 2.6rem; object-fit: cover; border-radius: 50%; display: block; }
-  .pick-emoji img { width: clamp(2.6rem, 9vw, 4.5rem); height: clamp(2.6rem, 9vw, 4.5rem); object-fit: cover; border-radius: 50%; display: block; }
-  .row-head { display: flex; align-items: baseline; gap: 8px; }
-  .row-name { font-family: var(--display); font-weight: 700; font-size: 1.15rem; line-height: 1.4; }
-  .leader { flex: 1; border-bottom: 2px dotted var(--line); transform: translateY(-4px); min-width: 12px; }
-  .spice { white-space: nowrap; font-size: .9rem; color: var(--muted); }
-  .row-desc { grid-column: 2; margin: 0; color: var(--muted); font-size: .98rem; max-width: 36em; }
-  .row-cat { grid-column: 2; color: var(--lime); font-size: .85rem; font-weight: 600; }
-  .btn-detail {
-    background: none; border: 0; padding: 0 0 0 8px; color: var(--chili);
-    text-decoration: underline; font-weight: 600; font-size: .85rem;
-  }
-  dialog {
-    background: var(--tile); color: var(--ink);
-    border: 3px solid var(--ink); border-radius: 8px;
-    padding: 20px; width: min(560px, calc(100vw - 32px)); max-height: 88vh;
-  }
-  dialog::backdrop { background: rgba(0, 0, 0, .55); }
-  dialog h2 { margin: 0; font-size: 1.6rem; }
-  dialog h3 { font-family: var(--display); font-size: 1.05rem; margin: 18px 0 6px; }
-  dialog p { margin: 8px 0; }
-  .detail-top { display: flex; align-items: center; gap: 14px; }
-  .detail-icon { font-size: 3rem; line-height: 1; }
-  .detail-icon img { width: 4.5rem; height: 4.5rem; object-fit: cover; border-radius: 50%; display: block; }
-  .detail-meta { color: var(--muted); margin: 2px 0 0; }
-  .chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
-  .chips li { border: 2px solid var(--ink); border-radius: 999px; padding: 2px 12px; font-size: .95rem; }
-  .chips.warn li { border-color: var(--chili); color: var(--chili); font-weight: 600; }
-  .btn-close {
-    margin-top: 20px; background: var(--ink); color: var(--tile);
-    border: 0; border-radius: 6px; padding: 10px 24px; font-family: var(--display); font-weight: 700;
-  }
-  .heart {
-    grid-column: 3; grid-row: 1 / span 3;
-    background: none; border: 0; padding: 6px 8px;
-    font-size: 1.7rem; line-height: 1; color: var(--muted);
-  }
-  .heart[aria-pressed="true"] { color: var(--chili); }
-  .empty { padding: 16px 4px; color: var(--muted); border-top: 3px solid var(--ink); }
-  footer { color: var(--muted); font-size: .9rem; margin-top: 40px; }
+  .count { margin: 0 0 24px; color: var(--slate); font-size: 14px; }
+  .btn-clear { background: none; border: 0; padding: 0 4px; color: var(--deep-forest); text-decoration: underline; font-weight: 700; }
 
-  @media (min-width: 720px) {
-    .sign { padding: 44px 16px 48px; }
+  /* การ์ดเมนู: รูปคือการ์ด ไม่มีพื้นหลัง เส้นขอบ หรือเงา */
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 40px 24px; }
+  .card-img { aspect-ratio: 1; border-radius: 20px; overflow: hidden; background: var(--sage-mist); }
+  .band-sage .card-img { background: var(--warm-sand); }
+  .card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ph { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 5rem; line-height: 1; }
+  .card-body { padding: 16px 0 0; }
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .card-name { margin: 0; font-weight: 700; font-size: 20px; line-height: 1.3; letter-spacing: .03em; }
+  .card-meta { margin: 4px 0 8px; font-size: 14px; color: var(--slate); }
+  .card-desc { margin: 0 0 16px; }
+  .heart {
+    flex: none; background: none; border: 0; padding: 0 4px; min-width: 44px; min-height: 44px; margin: -8px -8px 0 0;
+    font-size: 1.6rem; line-height: 1; color: var(--ink);
+  }
+  .heart[aria-pressed="true"] { color: var(--deep-forest); }
+  .empty { grid-column: 1 / -1; padding: 24px 0; color: var(--slate); }
+
+  footer { background: var(--deep-forest); color: var(--cream); padding: 40px 0; font-size: 14px; }
+
+  dialog {
+    background: var(--cream); color: var(--ink);
+    border: 0; border-radius: 24px; box-shadow: var(--shadow-xl);
+    padding: 24px; width: min(560px, calc(100vw - 32px)); max-height: 88vh;
+  }
+  dialog::backdrop { background: rgba(14, 21, 14, .55); }
+  dialog h2 { margin: 0; font-weight: 400; font-size: 2rem; line-height: 1.15; letter-spacing: 0; }
+  dialog h3 { font-size: 14px; font-weight: 700; letter-spacing: .05em; margin: 20px 0 8px; color: var(--deep-forest); }
+  dialog p { margin: 8px 0; }
+  .detail-top { display: flex; align-items: center; gap: 16px; }
+  .detail-icon { flex: none; width: 88px; height: 88px; border-radius: 20px; overflow: hidden; background: var(--sage-mist); }
+  .detail-icon .ph { font-size: 3rem; }
+  .detail-meta { color: var(--slate); margin: 2px 0 0; font-size: 14px; }
+  .chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips li { border: 2px solid var(--deep-forest); border-radius: 9999px; padding: 2px 14px; font-size: 14px; }
+  .chips.warn li { background: var(--deep-forest); color: var(--cream); font-weight: 700; }
+  .btn-close { margin-top: 24px; }
+
+  @media (max-width: 719px) {
+    .nav .inner { grid-template-columns: auto 1fr; gap: 12px; }
+    .nav a.nav-link { display: none; }
+    .logo { font-size: 20px; }
+    .hero { display: block; min-height: 0; }
+    .hero-media { position: static; height: 300px; }
+    .hero-media .ph { font-size: 8rem; }
+    .panel { margin: 0; width: 100%; background: var(--cream); padding: 24px 20px 32px; }
+    .band { padding: 56px 0; }
+    .tabs { gap: 24px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .pill, .link { transition: background-color .15s, box-shadow .15s; }
   }
 </style>
 </head>
 <body>
-<section class="sign" aria-label="ผลสุ่มเมนู">
-  <div class="sign-in">
-    <p class="sign-title">🍛 วันนี้กินอะไรดี</p>
+<header class="nav">
+  <div class="inner">
+    <a class="nav-link" href="#menu">เมนูทั้งหมด</a>
+    <a class="logo" href="#top">วันนี้กินอะไรดี</a>
+    <a class="pill" href="#favs">รายการโปรด</a>
+  </div>
+</header>
+
+<section class="hero" id="top" aria-label="ผลสุ่มเมนู">
+  <div class="hero-media" id="heroMedia" aria-hidden="true"><span class="ph">🍛</span></div>
+  <div class="panel">
+    <p class="eyebrow">วันนี้กินอะไรดี</p>
     <div id="pickBody" aria-live="polite">
       <h1 class="pick-name">สุ่มเมนูให้หน่อย</h1>
       <p class="pick-desc">กดปุ่มด้านล่าง เดี๋ยวเลือกให้หนึ่งเมนู</p>
     </div>
-    <div class="sign-actions">
-      <button class="btn-random" id="randomBtn" type="button">🎲 สุ่มเมนูวันนี้</button>
+    <div class="hero-actions">
+      <button class="pill pill-primary" id="randomBtn" type="button">สุ่มเมนูวันนี้</button>
       <label class="opt"><input type="checkbox" id="onlyFav"> สุ่มจากรายการโปรดเท่านั้น</label>
     </div>
     <p class="note" id="note" role="status"></p>
   </div>
 </section>
 
-<main class="wrap">
-  <h2>รายการโปรดของฉัน</h2>
-  <div id="favList"></div>
-
-  <h2>เมนูทั้งหมด</h2>
-  <div class="search">
-    <input type="search" id="q" placeholder="ค้นหาชื่อเมนูหรือวัตถุดิบ เช่น กุ้ง หมูสับ" aria-label="ค้นหาเมนู" autocomplete="off">
-    <select id="spiceSel" aria-label="กรองตามระดับความเผ็ด">
-      <option value="">ทุกระดับความเผ็ด</option>
-      <option value="0">ไม่เผ็ด</option>
-      <option value="1">เผ็ดน้อย 🌶️</option>
-      <option value="2">เผ็ดกลาง 🌶️🌶️</option>
-      <option value="3">เผ็ดมาก 🌶️🌶️🌶️</option>
-    </select>
-    <label class="opt-dark"><input type="checkbox" id="favOnly"> เฉพาะรายการโปรด</label>
+<section class="band band-sage" id="favs">
+  <div class="inner">
+    <h2 class="section-title">รายการโปรดของฉัน</h2>
+    <div id="favList"></div>
   </div>
-  <div class="tabs" id="filters" role="group" aria-label="กรองตามหมวด"></div>
-  <p class="count" id="count" role="status"></p>
-  <ul class="menu" id="allList"></ul>
+</section>
 
-  <footer>รายการโปรดเก็บไว้ในเบราว์เซอร์ของคุณเท่านั้น</footer>
+<main class="band" id="menu">
+  <div class="inner">
+    <h2 class="section-title">เมนูทั้งหมด</h2>
+    <div class="tabs" id="filters" role="group" aria-label="กรองตามหมวด"></div>
+    <div class="search">
+      <input type="search" id="q" placeholder="ค้นหาชื่อเมนูหรือวัตถุดิบ เช่น กุ้ง หมูสับ" aria-label="ค้นหาเมนู" autocomplete="off">
+      <select id="spiceSel" aria-label="กรองตามระดับความเผ็ด">
+        <option value="">ทุกระดับความเผ็ด</option>
+        <option value="0">ไม่เผ็ด</option>
+        <option value="1">เผ็ดน้อย 🌶️</option>
+        <option value="2">เผ็ดกลาง 🌶️🌶️</option>
+        <option value="3">เผ็ดมาก 🌶️🌶️🌶️</option>
+      </select>
+      <label class="opt"><input type="checkbox" id="favOnly"> เฉพาะรายการโปรด</label>
+    </div>
+    <p class="count" id="count" role="status"></p>
+    <ul class="grid" id="allList"></ul>
+  </div>
 </main>
+
+<footer><div class="inner">รายการโปรดเก็บไว้ในเบราว์เซอร์ของคุณเท่านั้น</div></footer>
 
 <dialog id="detailDlg" aria-labelledby="detailTitle">
   <div id="detailBody"></div>
-  <button class="btn-close" id="detailClose" type="button">ปิด</button>
+  <button class="pill btn-close" id="detailClose" type="button">ปิด</button>
 </dialog>
 
 <script>
@@ -328,34 +339,40 @@ function imgSrc(d) { return d.img || (IMG_SLUGS[d.id] ? `images/${IMG_SLUGS[d.id
 // ถ้าไฟล์รูปโหลดไม่ได้ ให้กลับไปแสดง emoji
 function iconHTML(d) {
   const src = imgSrc(d);
-  return src ? `<img src="${src}" alt="" onerror="this.replaceWith(document.createTextNode('${d.emoji}'))">` : d.emoji;
+  return src
+    ? `<img src="${src}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ph',textContent:'${d.emoji}'}))">`
+    : `<span class="ph">${d.emoji}</span>`;
 }
 
 function rowHTML(d) {
   const on = isFav(d.id);
-  return `<li class="row">
-    <div class="emoji" aria-hidden="true">${iconHTML(d)}</div>
-    <div class="row-head"><span class="row-name">${d.name}</span><span class="leader" aria-hidden="true"></span><span class="spice" role="img" aria-label="${spiceLabel(d.spice)}">${spiceText(d.spice)}</span></div>
-    <p class="row-desc">${d.desc}</p>
-    <span class="row-cat">${d.cat} <button class="btn-detail" type="button" data-detail="${d.id}">ดูส่วนประกอบ</button></span>
-    <button class="heart" type="button" data-fav="${d.id}" aria-pressed="${on}" aria-label="${on ? "เอา" + d.name + "ออกจากรายการโปรด" : "เพิ่ม" + d.name + "เป็นรายการโปรด"}">${on ? "♥" : "♡"}</button>
+  return `<li class="card">
+    <div class="card-img" aria-hidden="true">${iconHTML(d)}</div>
+    <div class="card-body">
+      <div class="card-head"><h3 class="card-name">${d.name}</h3>
+      <button class="heart" type="button" data-fav="${d.id}" aria-pressed="${on}" aria-label="${on ? "เอา" + d.name + "ออกจากรายการโปรด" : "เพิ่ม" + d.name + "เป็นรายการโปรด"}">${on ? "♥" : "♡"}</button></div>
+      <p class="card-meta">${d.cat} · <span role="img" aria-label="${spiceLabel(d.spice)}">${spiceText(d.spice)}</span></p>
+      <p class="card-desc">${d.desc}</p>
+      <button class="link" type="button" data-detail="${d.id}">ดูส่วนประกอบ →</button>
+    </div>
   </li>`;
 }
+function setHero(d) { $("heroMedia").innerHTML = iconHTML(d); }
 
 function renderPick() {
   const d = byId.get(lastPickId);
   if (!d) return;
   const on = isFav(d.id);
-  $("pickBody").innerHTML = `<div class="pick-emoji" aria-hidden="true">${iconHTML(d)}</div>
-    <h1 class="pick-name">${d.name}</h1>
+  setHero(d);
+  $("pickBody").innerHTML = `<h1 class="pick-name">${d.name}</h1>
     <p class="pick-desc">${d.desc}</p>
     <div class="pick-meta"><span>${d.cat}</span><span role="img" aria-label="${spiceLabel(d.spice)}">${spiceText(d.spice)}</span>
-    <button class="pick-heart" type="button" data-fav="${d.id}" aria-pressed="${on}">${on ? "♥ เป็นรายการโปรดแล้ว" : "♡ เพิ่มเป็นรายการโปรด"}</button>
-    <button class="pick-heart" type="button" data-detail="${d.id}">ดูส่วนประกอบ</button></div>`;
+    <button class="pill pick-heart" type="button" data-fav="${d.id}" aria-pressed="${on}">${on ? "♥ เป็นรายการโปรดแล้ว" : "♡ เพิ่มเป็นรายการโปรด"}</button>
+    <button class="pill" type="button" data-detail="${d.id}">ดูส่วนประกอบ</button></div>`;
 }
 function renderFavs() {
   $("favList").innerHTML = favorites.length
-    ? `<ul class="menu">${favorites.map(id => rowHTML(byId.get(id))).join("")}</ul>`
+    ? `<ul class="grid">${favorites.map(id => rowHTML(byId.get(id))).join("")}</ul>`
     : `<div class="empty">ยังไม่มีรายการโปรด กดหัวใจ ♡ ที่เมนูที่ชอบได้เลย</div>`;
 }
 function filteredDishes() {
@@ -423,7 +440,8 @@ function randomPick() {
       return;
     }
     const d = DISHES[Math.floor(Math.random() * DISHES.length)];
-    $("pickBody").innerHTML = `<div class="pick-emoji" aria-hidden="true">${iconHTML(d)}</div><p class="pick-name" aria-hidden="true">${d.name}</p><p class="pick-desc"></p>`;
+    setHero(d);
+    $("pickBody").innerHTML = `<p class="pick-name" aria-hidden="true">${d.name}</p><p class="pick-desc"></p>`;
   }, 70);
 }
 
