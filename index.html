@@ -60,6 +60,9 @@
   .nav a.nav-link { color: var(--ink); font-weight: 700; font-size: 14px; letter-spacing: .05em; text-decoration: none; }
   .nav a.nav-link:hover { text-decoration: underline; }
   .logo { color: var(--deep-forest); font-weight: 700; font-size: 24px; text-decoration: none; }
+  .nav-r { justify-self: end; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  #authForm { display: grid; gap: 12px; margin-top: 16px; }
+  #authForm input { padding: 10px 12px; font: inherit; border: 2px solid var(--deep-forest); border-radius: 8px; }
   .nav .pill { justify-self: end; padding: 8px 16px; min-height: 40px; font-size: 14px; letter-spacing: .05em; }
 
   /* ฮีโร่ = ผลสุ่มเมนู */
@@ -175,7 +178,10 @@
   <div class="inner">
     <a class="nav-link" href="#menu">เมนูทั้งหมด</a>
     <a class="logo" href="#top">วันนี้กินอะไรดี</a>
-    <a class="pill" href="#favs">รายการโปรด</a>
+    <div class="nav-r">
+      <a class="pill" href="#favs">รายการโปรด</a>
+      <button class="pill" id="authBtn" type="button">สมัครสมาชิก / เข้าสู่ระบบ</button>
+    </div>
   </div>
 </header>
 
@@ -229,7 +235,57 @@
   <button class="pill btn-close" id="detailClose" type="button">ปิด</button>
 </dialog>
 
+<dialog id="authDlg" aria-labelledby="authTitle">
+  <h2 id="authTitle">สมัครสมาชิก</h2>
+  <form id="authForm">
+    <div id="authExtra" style="display:grid;gap:12px">
+      <input id="authFirst" type="text" placeholder="ชื่อ" aria-label="ชื่อ" autocomplete="given-name" required>
+      <input id="authLast" type="text" placeholder="นามสกุล" aria-label="นามสกุล" autocomplete="family-name" required>
+      <input id="authPhone" type="tel" placeholder="เบอร์โทร" aria-label="เบอร์โทร" autocomplete="tel" pattern="[0-9+\- ]{9,15}" required>
+    </div>
+    <input id="authEmail" type="email" placeholder="อีเมล" aria-label="อีเมล" autocomplete="email" required>
+    <input id="authPass" type="password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)" aria-label="รหัสผ่าน" minlength="6" autocomplete="new-password" required>
+    <button class="pill pill-primary" type="submit" id="authSubmit">สมัครสมาชิก</button>
+    <button class="btn-clear" type="button" id="authSwitch">มีบัญชีแล้ว? เข้าสู่ระบบ</button>
+    <p class="note" id="authMsg" role="status"></p>
+  </form>
+  <button class="pill btn-close" id="authClose" type="button">ปิด</button>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const sb = supabase.createClient("https://roqdgdzknhljusijntyz.supabase.co", "sb_publishable_7_IxI4q3KCyeOgAAsuCiPQ_NLNoPZ4X");
+let signup = true;
+function authMode(s) {
+  signup = s;
+  $("authTitle").textContent = $("authSubmit").textContent = s ? "สมัครสมาชิก" : "เข้าสู่ระบบ";
+  $("authExtra").hidden = !s;
+  ["authFirst", "authLast", "authPhone"].forEach(id => $(id).required = s);
+  $("authSwitch").textContent = s ? "มีบัญชีแล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครสมาชิก";
+  $("authMsg").textContent = "";
+}
+function authUI(user) {
+  $("authBtn").textContent = user ? `ออกจากระบบ (${user.user_metadata?.first_name || user.email})` : "สมัครสมาชิก / เข้าสู่ระบบ";
+}
+$("authBtn").addEventListener("click", async () => {
+  if ((await sb.auth.getSession()).data.session) return sb.auth.signOut();
+  authMode(true); $("authDlg").showModal();
+});
+$("authSwitch").addEventListener("click", () => authMode(!signup));
+$("authClose").addEventListener("click", () => $("authDlg").close());
+$("authForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const email = $("authEmail").value, password = $("authPass").value, msg = $("authMsg");
+  msg.textContent = "กำลังดำเนินการ...";
+  const { data, error } = signup
+    ? await sb.auth.signUp({ email, password, options: { data: { first_name: $("authFirst").value.trim(), last_name: $("authLast").value.trim(), phone: $("authPhone").value.trim() } } })
+    : await sb.auth.signInWithPassword({ email, password });
+  if (error) { msg.textContent = error.message; return; }
+  if (signup && !data.session) { msg.textContent = "สมัครสำเร็จ กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ"; return; }
+  $("authForm").reset(); $("authDlg").close();
+});
+sb.auth.onAuthStateChange((_, s) => authUI(s?.user));
+
 const DISHES = [
   { id: 1,  name: "ผัดไทย",            desc: "เส้นจันท์ผัดซอสมะขาม ใส่กุ้งสด เต้าหู้ ถั่วงอก โรยถั่วลิสง", cat: "ผัด", spice: 1, emoji: "🍜", img: "images/pad-thai.png" },
   { id: 2, name: "กะเพราหมูสับไข่ดาว", desc: "หมูสับผัดใบกะเพรา พริก กระเทียม เสิร์ฟกับข้าวและไข่ดาวกรอบ", cat: "ผัด", spice: 3, emoji: "🍳" },
