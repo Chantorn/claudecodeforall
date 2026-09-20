@@ -254,6 +254,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const $ = id => document.getElementById(id);
 const sb = supabase.createClient("https://roqdgdzknhljusijntyz.supabase.co", "sb_publishable_7_IxI4q3KCyeOgAAsuCiPQ_NLNoPZ4X");
 let signup = true;
 function authMode(s) {
@@ -355,7 +356,6 @@ const CATEGORIES =["ทั้งหมด", ...new Set(DISHES.map(d => d.cat))];
 const STORAGE_KEY = "thaiFoodFavorites";
 
 const byId = new Map(DISHES.map(d => [d.id, d]));
-const $ = id => document.getElementById(id);
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 let favorites = loadFavorites();
